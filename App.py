@@ -32,7 +32,7 @@ def open_chrome(message):
 
 
 @bot.message_handler(func=lambda message: message.text == 'Abrir Github')
-def open_chrome(message):
+def open_github(message):
     url = 'https://github.com'
     webbrowser.open(url)
     bot.send_message(message.chat.id, "Chrome aberto.")
