@@ -35,7 +35,7 @@ def open_chrome(message):
 def open_chrome(message):
     url = 'https://github.com'
     webbrowser.open(url)
-    bot.send_message(message.chat.id, "Chrome aberto."
+    bot.send_message(message.chat.id, "Chrome aberto.")
 @bot.message_handler(func=lambda message: message.text == 'Ajustar Brilho')
 def adjust_brightness(message):
     levels = [15, 50, 90]
@@ -52,12 +52,10 @@ def adjust_brightness(message):
 
 @bot.message_handler(func=lambda message: True)
 def response(message):
-    try:
-        response = model.generate_content(prompt=message.text)
-        text_response = response.candidates[0].text
+        response = model.generate_content(message.text)
+        text_response = response.candidates[0].content.parts[0].text
         bot.reply_to(message, text_response)
-    except Exception as e:
-        bot.reply_to(message, f" {str(e)}")
+
 
 # Inicia o bot
 bot.polling()
