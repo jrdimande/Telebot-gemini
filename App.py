@@ -13,7 +13,7 @@ def verify(message):
 
 
 @bot.message_handler(func= verify)
-def response(message):
+def response(message ):
         response = model.generate_content(message.text)
         text_response = response.candidates[0].content.parts[0].text
         bot.reply_to(message, text_response)
