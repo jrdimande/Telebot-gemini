@@ -24,7 +24,8 @@ def create_markup():
     vol_up_button = telebot.types.KeyboardButton('Volume +')
     vol_down_button = telebot.types.KeyboardButton('Volume -')
     screenshot_button = telebot.types.KeyboardButton('Captura')
-    markup.add(chrome_button, brightness_button, github_button, system_button, vol_down_button, vol_up_button, screenshot_button)
+    youtube_button = telebot.types.KeyboardButton("Abrir Youtube")
+    markup.add(chrome_button, brightness_button, github_button, system_button, vol_down_button, vol_up_button, screenshot_button, youtube_button)
 
     return markup
 
@@ -83,6 +84,12 @@ def open_github(message):
     webbrowser.open(url)
     bot.send_message(message.chat.id, "Github aberto.")
 
+@bot.message_handler(func=lambda message: message.text == 'Abrir Youtube')
+def open_youtube(message):
+    url = 'https://youtube.com'
+    webbrowser.open(url)
+    bot.reply_to(message, 'Youtube aberto')
+
 
 
 
@@ -91,7 +98,7 @@ def open_github(message):
 # Função para ajustar brilho
 @bot.message_handler(func=lambda message: message.text == 'Ajustar Brilho')
 def adjust_brightness(message):
-    levels = [30, 40, 50, 60, 70, 90]
+    levels = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     level = random.choice(levels)
 
     try:
