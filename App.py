@@ -47,7 +47,11 @@ def system_info(message):
     cpu_usage = psutil.cpu_percent(interval=1)
     memory_info = psutil.virtual_memory()
     storage = psutil.disk_usage('/')
-    info = f"Uso do CPU: {cpu_usage}%\nMemória Usada: {memory_info.used / (1024 ** 3): .2f} GB\nMémoria Total: {memory_info.total / (1024 ** 3): .2f} GB\nArmazenamento Usado: {storage.used / (1024 ** 3): .2f} GB\nArmazenamento Total: {storage.total / (1024 ** 3): .2f} GB\nArmazenamento Restante: {storage.total / (1024 ** 3) - storage.used / (1024 ** 3): .2f}"
+    info = (f"Uso do CPU: {cpu_usage}%\nMemória Usada: {memory_info.used / (1024 ** 3): .2f} GB"
+            f"\nMémoria Total: {memory_info.total / (1024 ** 3): .2f} GB\n"
+            f"Armazenamento Usado: {storage.used / (1024 ** 3): .2f} GB\n"
+            f"Armazenamento Total: {storage.total / (1024 ** 3): .2f} GB"
+            f"\nArmazenamento Restante: {storage.total / (1024 ** 3) - storage.used / (1024 ** 3): .2f}")
     bot.reply_to(message, info)
 
 
