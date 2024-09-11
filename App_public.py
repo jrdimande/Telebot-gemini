@@ -1,16 +1,13 @@
 import telebot
-from apis import *
-import google.generativeai as gemini
+import cohere
 import docx
 from gtts import gTTS
+from apis import *
 import fitz
 
-
-# Config
+# Configurações
 bot = telebot.TeleBot(API_KEY_TELEGRAM)
-gemini.configure(api_key=GEMINI_API_KEY)
-model = gemini.GenerativeModel('gemini-pro')
-
+co = cohere.Client(Cohere_API)
 
 # Função para criar botões
 def create_markup():
@@ -18,7 +15,6 @@ def create_markup():
     help_button = telebot.types.KeyboardButton('HELP')
     markup.add(help_button)
     return markup
-
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -36,14 +32,7 @@ def send_help(message):
     )
     bot.send_message(message.chat.id, help_text)
 
-
-
-
-
-
-
-
-# Função para gerar resumo de documentos
+# Função para gerar resumo de documentos usando Cohere
 def resumir_doc(doc_path):
     doc = docx.Document(doc_path)
     texto_completo = []
@@ -53,8 +42,12 @@ def resumir_doc(doc_path):
 
     texto = '\n'.join(texto_completo)
 
-    response = model.generate_content(f"responda: {texto}")
-    resumo = response.candidates[0].content.parts[0].text
+    response = co.generate(
+        model='command-xlarge-nightly',
+        prompt=f"Faça um resumo detalhado e exclua o '*': {texto}",
+        max_tokens=500
+    )
+    resumo = response.generations[0].text
 
     documento_resumido = docx.Document()
     documento_resumido.add_paragraph(resumo)
@@ -63,7 +56,6 @@ def resumir_doc(doc_path):
     documento_resumido.save(resumo_path)
 
     return resumo_path
-
 
 # Função para gerar resumo de PDFs
 def resumir_pdf(pdf_path):
@@ -75,8 +67,12 @@ def resumir_pdf(pdf_path):
 
     texto = '\n'.join(texto_completo)
 
-    response = model.generate_content(f"Faça resumo do texto sem colocar '*' com titulo e subtitulos: {texto}")
-    resumo = response.candidates[0].content.parts[0].text
+    response = co.generate(
+        model='command-xlarge-nightly',
+        prompt=f"Faça um resumo com título e subtítulos: {texto}",
+        max_tokens=200
+    )
+    resumo = response.generations[0].text
 
     documento_resumido = docx.Document()
     documento_resumido.add_paragraph(resumo)
@@ -85,7 +81,6 @@ def resumir_pdf(pdf_path):
     documento_resumido.save(resumo_path)
 
     return resumo_path
-
 
 # Função para receber documentos
 @bot.message_handler(content_types=['document'])
@@ -105,7 +100,7 @@ def handle_document(message):
         bot.send_document(message.chat.id, doc)
     bot.send_message(message.chat.id, "Resumo do documento enviado.")
 
-
+# Função para áudio
 @bot.message_handler(content_types=['voice'])
 def open_audio(message):
     user_first_name = message.from_user.first_name
@@ -124,16 +119,16 @@ def open_audio(message):
     except Exception as e:
         bot.send_message(message.chat.id, "Falha ao enviar áudio.")
 
-@bot.message_handler()
-
-
-# Função para gerar respostas com AI
+# Função para gerar respostas com Cohere AI
 @bot.message_handler(func=lambda message: True)
 def response(message):
-    response = model.generate_content(message.text)
-    text_response = response.candidates[0].content.parts[0].text
+    response = co.generate(
+        model='command-xlarge-nightly',
+        prompt=message.text,
+        max_tokens=200
+    )
+    text_response = response.generations[0].text
     bot.reply_to(message, text_response)
-
 
 # Inicia o bot
 bot.polling()
