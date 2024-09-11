@@ -9,6 +9,7 @@ import psutil
 import pyautogui
 import requests
 import docx
+from gtts import gTTS
 
 
 # Config
@@ -29,8 +30,9 @@ def create_markup():
     vol_down_button = telebot.types.KeyboardButton('Volume -')
     screenshot_button = telebot.types.KeyboardButton('Captura')
     youtube_button = telebot.types.KeyboardButton("Abrir Youtube")
+    fenix_button = telebot.types.KeyboardButton("Fenix")
     markup.add(chrome_button, brightness_button, github_button, system_button, vol_down_button, vol_up_button,
-               screenshot_button, youtube_button)
+               screenshot_button, youtube_button, fenix_button)
 
     return markup
 
@@ -67,6 +69,12 @@ def volume_up(message):
 def volume_down(message):
     pyautogui.hotkey('volumedown')
     bot.send_message(message.chat.id, "Volume diminuído.")
+
+
+@bot.message_handler(func=lambda message: message.text == 'Fenix')
+def open_fenix(message):
+    url = "https://fenix.isutc.ac.mz"
+    webbrowser.open(url)
 
 
 # Função para fazer screenshot
@@ -158,12 +166,34 @@ def handle_document(message):
     bot.send_message(message.chat.id, "Resumo do documento enviado.")
 
 
+@bot.message_handler(content_types=['voice'])
+def open_audio(message):
+    user_first_name = message.from_user.first_name
+    user_last_name = message.from_user.last_name
+    user_full_name = f"{user_first_name} {user_last_name}" if user_last_name else user_first_name
+
+    texto = f"Oi {user_full_name}, No momento eu não consigo ouvir e responder a áudios, mas estou trabalhando nisso e em breve estarei pronto para isso!"
+    tts = gTTS(text=texto, lang='pt', slow=False)
+
+    arquivo_audio = "chatbot.mp3"
+    tts.save(arquivo_audio)
+
+    audio_path = "C:/Users/25884/PycharmProjects/Chatbot/chatbot.mp3"
+
+    try:
+        with open(audio_path, 'rb') as audio_file:
+            bot.send_audio(message.chat.id, audio_file)
+    except Exception as e:
+        bot.send_message(message.chat.id, "Falha ao enviar áudio.")
+
+
 # Função para gerar respostas com AI
 @bot.message_handler(func=lambda message: True)
 def response(message):
     response = model.generate_content(message.text)
     text_response = response.candidates[0].content.parts[0].text
     bot.reply_to(message, text_response)
+
 
 
 # Inicia o bot
