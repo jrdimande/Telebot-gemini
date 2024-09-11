@@ -70,7 +70,7 @@ def resumir_pdf(pdf_path):
     response = co.generate(
         model='command-xlarge-nightly',
         prompt=f"Faça um resumo com título e subtítulos: {texto}",
-        max_tokens=200
+        max_tokens=3000
     )
     resumo = response.generations[0].text
 
